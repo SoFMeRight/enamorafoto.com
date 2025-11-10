@@ -1,17 +1,17 @@
-# SoFMeRight.com Site
+# EnamoraFoto.com Site
 
-Minimal container that serves the landing page for SoFMeRight.com at /index.html.
+Minimal container that serves the landing page for EnamoraFoto.com at /index.html.
 
-> ⚠️ Unmodified usage of this container is prohibited unless you are the operator of SoFMeRight.com, obviously; as that would be fraud.
+> ⚠️ Unmodified usage of this container is prohibited unless you are the operator of EnamoraFoto.com, obviously; as that would be fraud.
 
 ## Quick start (Docker Compose)
 ```yaml
 version: "3.9"
 
 services:
-  SoFMeRight-site:
-    image: prplanit/SoFMeRight-com:v0.0.2
-    container_name: SoFMeRight-site
+  enamorafoto-site:
+    image: prplanit/enamorafoto.com:latest
+    container_name: enamorafoto-site
     ports:
       - "8015:80"   # host:container
     restart: unless-stopped
@@ -28,10 +28,10 @@ docker compose up -d
 
 Quick start (docker run)
 ```bash
-docker run -d --name SoFMeRight-site \
+docker run -d --name enamorafoto-site \
   -p 8015:80 \
   --restart unless-stopped \
-  prplanit/sm-lickitung-oci:v0.0.2
+  prplanit/enamorafoto.com:latest
 ```
 
 ### What’s inside
@@ -46,7 +46,7 @@ Default doc root baked into the image
 
 #### Health & logs
 ```bash
-docker logs -f SoFMeRight-site
+docker logs -f enamorafoto-site
 docker ps
 ```
 
