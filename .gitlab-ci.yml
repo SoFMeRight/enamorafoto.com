@@ -17,7 +17,7 @@ include:
   - project: 'components/stagefreight'
     file: '/export-dependencies.yml'
     ref: main
-        
+
 stages:
   - build
   - security

@@ -1,5 +1,5 @@
 <?php
-	
+
 
 	$mail_to = 'astralfocal@gmail.com'; // specify your email here
 
@@ -14,9 +14,9 @@
 	// Check box
 
 	$Custom_Object = $_POST['Custom Object'];
-	
 
-	
+
+
 	// Construct subject of the email
 
 

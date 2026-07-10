@@ -6,7 +6,7 @@
 	$mail_from = $_POST['sender_email'];
 	$phone = $_POST['sender_phone'];
 	$message = $_POST['sender_message'];
-	
+
 	// Construct subject of the email
 	$subject = 'www.mysite.com Message from visitor ' . $name;
 

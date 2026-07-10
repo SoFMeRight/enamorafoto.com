@@ -14,7 +14,7 @@
 
 	$message = $_POST['sender_message'];
 
-	
+
 
 	// Construct subject of the email
 

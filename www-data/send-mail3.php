@@ -1,8 +1,8 @@
 <?php
-	
+
 	//reciving address
-	$mail_to = 'astralfocal@gmail.com'; 
-	
+	$mail_to = 'astralfocal@gmail.com';
+
 	// specify your email here
 
 
@@ -16,18 +16,18 @@
     $startmonth = $_POST['StartMonth'];
 
 
-if( $checkbbox == 'Yes') 
+if( $checkbbox == 'Yes')
 {
     $Custom_Object = "want Custom Object";
 }
 else
 {
     $Custom_Object = "Do not want Custom Object";
-}  
+}
 
 
 
-	
+
 	// Construct subject of the email
 
 
