@@ -1,0 +1,7 @@
+.git
+.gitignore
+.gitattributes
+.gitlab-ci.yml
+.stagefreight.yml
+.stagefreight/
+Readme.md
