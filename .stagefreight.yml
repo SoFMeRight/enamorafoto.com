@@ -1,8 +1,9 @@
-# enamorafoto.com — static site.
+# enamorafoto.com — static site (internal / private).
 #
 # Consumes the hardened non-root static-site base (FROM docker.io/prplanit/static-site
-# + COPY www-data/) and releases the image to all registries, mirrors source + releases
-# to GitHub, and deploys the same content to Cloudflare Pages at the apex domain.
+# + COPY www-data/). Private repo → image goes to Harbor (internal, k8s pulls here) and
+# GHCR (free private); NOT Docker Hub (no free private repos). Source + releases mirror
+# to GitHub; content deploys to Cloudflare Pages at the apex.
 
 version: 1
 
@@ -63,12 +64,6 @@ repos:
       releases: true
 
 registries:
-  dockerhub:
-    provider: docker
-    url: docker.io
-    credentials: DOCKER
-    default_path: "{var:org}/{var:repo}"
-
   harbor:
     provider: harbor
     url: cr.pcfae.com
@@ -82,26 +77,26 @@ registries:
     default_path: "{var:org}/{var:repo}"
 
 publish:
-  # ── Stable releases → all registries ─────────────────────────────
+  # ── Stable releases → Harbor (internal) + GHCR (private) ─────────
   stable:
     kind: registry
-    registry: [dockerhub, ghcr, harbor]
+    registry: [harbor, ghcr]
     build: enamorafoto-com
     tags: ["v{version}", "latest"]
     when: { git_tags: [stable], events: [tag] }
 
-  # ── Pre-releases (alpha/beta/rc) → Docker Hub + GHCR ─────────────
+  # ── Pre-releases (alpha/beta/rc) → GHCR ─────────────────────────
   prerelease:
     kind: registry
-    registry: [dockerhub, ghcr]
+    registry: [ghcr]
     build: enamorafoto-com
     tags: ["v{version}"]
     when: { git_tags: [prerelease], events: [tag] }
 
-  # ── Dev builds on every commit → all registries (retained/pruned) ──
+  # ── Dev builds on every commit → Harbor + GHCR (retained/pruned) ──
   dev:
     kind: registry
-    registry: [dockerhub, ghcr, harbor]
+    registry: [harbor, ghcr]
     build: enamorafoto-com
     tags: ["dev-{sha:8}", "latest-dev"]
     when: { branches: [main], events: [push] }
@@ -109,10 +104,10 @@ publish:
       keep_last: 6
       protect: ["latest-dev"]
 
-  # ── Project metadata: sync identity to registries + forge repos ──
+  # ── Project metadata: sync identity to Harbor + forge repos ──────
   project-metadata:
     kind: metadata
-    registry: [dockerhub, harbor]        # GHCR has no description API
+    registry: [harbor]                   # GHCR has no description API
     repos: [primary, github-mirror]
     readme: README.md
     description:
@@ -264,46 +259,16 @@ stencils:
     color: "#236144"
     font: dejavu-sans
     font_size: 11
-  pulls:
-    label: pulls
-    message: "{docker.pulls}"
-    color: "#1d63ed"
-    link: "https://hub.docker.com/r/{var:org}/{var:repo}"
-  release-latest:
-    label: latest
-    message: "v{base}"
-    color: "#74ecbe"
-    link: "https://hub.docker.com/r/{var:org}/{var:repo}/tags?name=latest"
-  release-updated:
-    label: updated
-    message: "{docker.tag.v{base}.updated}"
-    color: "#236144"
-  release-size:
-    label: size
-    message: "{docker.tag.v{base}.size}"
-    color: "#555"
-    link: "https://hub.docker.com/r/{var:org}/{var:repo}/tags?name=v{base}"
-  dev-latest:
-    label: latest-dev
-    message: "dev-{{sha}}"
-    color: "#3b82f6"
-    link: "https://hub.docker.com/r/{var:org}/{var:repo}/tags?name=latest-dev"
-  dev-updated:
-    label: updated
-    message: "{docker.tag.latest-dev.updated}"
-    color: "#236144"
-  dev-size:
-    label: size
-    message: "{docker.tag.latest-dev.size}"
-    color: "#555"
-    link: "https://hub.docker.com/r/{var:org}/{var:repo}/tags?name=latest-dev"
 
   # ── inline shields ──
   donate:  { render: shield, message: donate,  color: "#FF5E5B", logo: ko-fi,          logo_color: white, link: "https://ko-fi.com/T6T41IT163" }
   sponsor: { render: shield, message: sponsor, color: "#EA4AAA", logo: githubsponsors, logo_color: white, link: "https://github.com/sponsors/{var:github_org}" }
   github:  { render: shield, label: GitHub, message: source, color: "#181717", logo: github, link: "https://github.com/{var:github_org}/{var:github_repo}" }
   gitlab:  { render: shield, label: GitLab, message: source, color: "#FC6D26", logo: gitlab, link: "https://gitlab.prplanit.com/{var:gitlab_group}/{var:repo}" }
-  docker:  { render: shield, label: Docker, message: "{var:org}/{var:repo}", color: "#2496ED", logo: docker, logo_color: white, link: "https://hub.docker.com/r/{var:org}/{var:repo}" }
+
+  # ── image (internal): Harbor is primary (k8s pulls here); GHCR is the private mirror ──
+  harbor:  { render: shield, label: Harbor, message: "{var:org}/{var:repo}", color: "#4495d1", logo: harbor, logo_color: white, link: "https://cr.pcfae.com/harbor/projects" }
+  ghcr:    { render: shield, label: GHCR, message: "{var:org}/{var:repo}", color: "#181717", logo: github, logo_color: white, link: "https://github.com/{var:github_org}/{var:github_repo}/pkgs/container/{var:repo}" }
 
   # ── named producers · repo resolves from repos: publish-origin (github-mirror) ──
   last-commit:  { type: github-last-commit }
@@ -337,11 +302,11 @@ scribe:
       inline: true
       items: [github, gitlab, last-commit, issues-open, prs-open, contributors]
 
-    # Multi-row (br = line break): Row 1 = docker + pulls, Row 2 = release + dev tags.
+    # Internal image row: Harbor (primary) + GHCR (private mirror).
     readme.image:
       file: "README.md"
       between: ["<!-- sf:image:start -->", "<!-- sf:image:end -->"]
-      items: [docker, pulls, br, release-latest, release-updated, release-size, dev-latest, dev-updated, dev-size]
+      items: [harbor, ghcr]
 
     readme.contents.base:
       file: "README.md"
