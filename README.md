@@ -4,6 +4,23 @@ Minimal container that serves the landing page for EnamoraFoto.com at /index.htm
 
 > ⚠️ Unmodified usage of this container is prohibited unless you are the operator of EnamoraFoto.com, obviously; as that would be fraud.
 
+<!-- sf:project:start -->
+<!-- sf:project:end -->
+<!-- sf:badges:start -->
+<!-- sf:badges:end -->
+<!-- sf:image:start -->
+<!-- sf:image:end -->
+
+## Image contents
+
+Base:
+<!-- sf:contents-base:start -->
+<!-- sf:contents-base:end -->
+
+Packages:
+<!-- sf:contents-apk:start -->
+<!-- sf:contents-apk:end -->
+
 ## Quick start (Docker Compose)
 ```yaml
 version: "3.9"
