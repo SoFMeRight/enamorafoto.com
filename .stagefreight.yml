@@ -22,7 +22,7 @@ git:
     no_lineage: { mode: error }
 
 vars:
-  org: prplanit
+  org: sofmeright
   github_org: SoFMeRight
   gitlab_group: SoFMeRight
   repo: enamorafoto.com
