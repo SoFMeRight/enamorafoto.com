@@ -1,0 +1,14 @@
+services:
+  enamorafoto-site:
+    container_name: enamorafoto-site
+    image: ghcr.io/sofmeright/enamorafoto.com:latest # "latest" is not recommended! Explicitly tag the latest release.
+    ports:
+      - 8015:8080
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    restart: unless-stopped
