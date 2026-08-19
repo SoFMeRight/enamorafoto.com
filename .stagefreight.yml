@@ -269,12 +269,29 @@ stencils:
   # ── image (internal): Harbor is primary (k8s pulls here); GHCR is the private mirror ──
   harbor:  { render: shield, label: Harbor, message: "{var:org}/{var:repo}", color: "#4495d1", logo: harbor, logo_color: white, link: "https://cr.pcfae.com/harbor/projects" }
   ghcr:    { render: shield, label: GHCR, message: "{var:org}/{var:repo}", color: "#181717", logo: github, logo_color: white, link: "https://github.com/{var:github_org}/{var:github_repo}/pkgs/container/{var:repo}" }
+  # ── image (internal): Harbor version/dev/pulls, rendered from the Harbor API ──
+  harbor-version:
+    label: latest
+    message: "v{harbor.version}"
+    color: "#4495d1"
+    font: dejavu-sans
+    font_size: 11
+    link: "https://cr.pcfae.com/harbor/projects"
+  harbor-dev:
+    label: latest-dev
+    message: "{harbor.dev}"
+    color: "#4495d1"
+    font: dejavu-sans
+    font_size: 11
+    link: "https://cr.pcfae.com/harbor/projects"
+  harbor-pulls:
+    label: pulls
+    message: "{harbor.pulls}"
+    color: "#4495d1"
+    font: dejavu-sans
+    font_size: 11
+    link: "https://cr.pcfae.com/harbor/projects"
 
-  # ── named producers · repo resolves from repos: publish-origin (github-mirror) ──
-  last-commit:  { type: github-last-commit }
-  issues-open:  { type: github-issues-open }
-  prs-open:     { type: github-prs-open }
-  contributors: { type: github-contributors }
 
   # ── build-contents (rendered from the build's manifest inventory) ──
   contents-base:
@@ -300,13 +317,13 @@ scribe:
       file: "README.md"
       between: ["<!-- sf:project:start -->", "<!-- sf:project:end -->"]
       inline: true
-      items: [github, gitlab, last-commit, issues-open, prs-open, contributors]
+      items: [github, gitlab]
 
     # Internal image row: Harbor (primary) + GHCR (private mirror).
     readme.image:
       file: "README.md"
       between: ["<!-- sf:image:start -->", "<!-- sf:image:end -->"]
-      items: [harbor, ghcr]
+      items: [harbor, harbor-version, harbor-dev, harbor-pulls, ghcr]
 
     readme.contents.base:
       file: "README.md"
