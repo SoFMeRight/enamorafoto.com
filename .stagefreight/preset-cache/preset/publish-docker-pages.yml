@@ -1,0 +1,68 @@
+# publish — SITE bucket: an image plus a Cloudflare Pages deploy.
+#
+# Registries are ghcr + harbor, NOT dockerhub. A marketing site's image is pulled by the
+# cluster that serves it, never by the public, so publishing it to Docker Hub spends a
+# public namespace on something nobody pulls from there. Every site repo already had it
+# this way; the docker bucket keeps dockerhub because its images ARE the product. Composed for repos that both
+# build an image and publish a static site (the .com repos): everything below the pages
+# target is identical to publish-docker.yml, so the two stay in step by being edited
+# together, and the pages target carries only the half that is the SAME for every site.
+#
+# project: and domain: are NOT here on purpose — they are the two facts that differ per
+# site, so each catalog entry supplies them. domain accepts a list; precisionplanit.com
+# serves prplanit.com as well.
+publish:
+  stable:
+    kind: registry
+    registry: [harbor, ghcr]
+    build: image
+    tags: ["v{version}", "latest"]
+    when: { git_tags: [stable], events: [tag] }
+
+  prerelease:
+    kind: registry
+    registry: [ghcr]
+    build: image
+    tags: ["v{version}"]
+    when: { git_tags: [prerelease], events: [tag] }
+
+  dev:
+    kind: registry
+    registry: [harbor, ghcr]
+    build: image
+    tags: ["dev-{sha:8}", "latest-dev"]
+    when: { branches: [main], events: [push] }
+    retention:
+      keep_last: 2   # latest-dev is rolling (no sequence var) → auto-exempt, no protect needed
+
+  project-metadata:
+    kind: metadata
+    registry: [harbor]
+    repos: [primary, github-mirror]
+    readme: README.md
+    when: { branches: [main], events: [push, tag] }
+
+  release:
+    kind: release
+    type: latest
+    repos: [primary]
+    aliases: ["v{version}", "latest"]
+    when: { git_tags: [stable], events: [tag] }
+
+  dev-release:
+    kind: release
+    type: prerelease
+    repos: [primary]
+    tag: "dev-{sha:8}"
+    aliases: ["latest-dev"]
+    when: { branches: [main], events: [push] }
+    retention:
+      keep_last: 2
+
+  # The site itself. Deployed on every main push, unlike the image releases which are
+  # tag-gated: a content edit should reach the site without cutting a version.
+  pages:
+    kind: pages
+    provider: cloudflare
+    dir: ./www-data
+    when: { branches: [main], events: [push] }
